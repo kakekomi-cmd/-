@@ -18,12 +18,20 @@ export default async function Home() {
     <main className="mx-auto w-full max-w-4xl flex-1 px-6 py-10">
       <div className="mb-8 flex items-center justify-between">
         <h1 className="text-2xl font-bold">求人原稿一覧</h1>
-        <Link
-          href="/manuscripts/new"
-          className="rounded-md bg-black px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200"
-        >
-          + 新規作成
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link
+            href="/knowledge"
+            className="rounded-md border border-neutral-300 px-4 py-2 text-sm font-medium hover:bg-neutral-50 dark:border-neutral-700 dark:hover:bg-neutral-900"
+          >
+            ナレッジ管理
+          </Link>
+          <Link
+            href="/manuscripts/new"
+            className="rounded-md bg-black px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200"
+          >
+            + 新規作成
+          </Link>
+        </div>
       </div>
 
       {manuscripts.length === 0 ? (
@@ -41,7 +49,7 @@ export default async function Home() {
                 <div className="min-w-0">
                   <p className="truncate font-medium">{m.title}</p>
                   <p className="truncate text-sm text-neutral-500">
-                    {m.jobType}
+                    {m.instruction}
                   </p>
                 </div>
                 <div className="flex shrink-0 items-center gap-4 text-sm text-neutral-500">

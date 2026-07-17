@@ -16,20 +16,27 @@ enum ManuscriptStatus {
   COMPLETED
 }
 
-model Manuscript {
-  id          String            @id @default(cuid())
-  title       String
-  status      ManuscriptStatus  @default(DRAFT)
+// ナレッジとして蓄積する過去原稿（新規原稿生成時にAIが参照する）
+model KnowledgeManuscript {
+  id        String   @id @default(cuid())
+  title     String
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
 
-  // AI生成のベースになる入力項目
-  jobType     String            // 職種・仕事内容
-  conditions  String            // 給与・待遇・勤務条件
-  requirements String           // 応募資格・求める人物像
-  appeal      String            // 会社・職場の魅力（PRポイント）
+// 新規に作成する求人原稿
+model Manuscript {
+  id     String           @id @default(cuid())
+  title  String
+  status ManuscriptStatus @default(DRAFT)
+
+  // AI生成のベースになる自由記述の指示
+  instruction String @default("")
 
   // 生成・編集された原稿本文
-  content     String            @default("")
+  content String @default("")
 
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

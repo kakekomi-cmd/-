@@ -20,10 +20,7 @@ export default function ManuscriptEditor({
   const router = useRouter();
   const [title, setTitle] = useState(manuscript.title);
   const [status, setStatus] = useState(manuscript.status);
-  const [jobType, setJobType] = useState(manuscript.jobType);
-  const [conditions, setConditions] = useState(manuscript.conditions);
-  const [requirements, setRequirements] = useState(manuscript.requirements);
-  const [appeal, setAppeal] = useState(manuscript.appeal);
+  const [instruction, setInstruction] = useState(manuscript.instruction);
   const [content, setContent] = useState(manuscript.content);
 
   const [saving, setSaving] = useState(false);
@@ -41,15 +38,7 @@ export default function ManuscriptEditor({
       const res = await fetch(`/api/manuscripts/${manuscript.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title,
-          status,
-          jobType,
-          conditions,
-          requirements,
-          appeal,
-          content,
-        }),
+        body: JSON.stringify({ title, status, instruction, content }),
       });
       if (!res.ok) throw new Error("保存に失敗しました");
       setSavedAt(new Date());
@@ -69,12 +58,15 @@ export default function ManuscriptEditor({
       await fetch(`/api/manuscripts/${manuscript.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, jobType, conditions, requirements, appeal }),
+        body: JSON.stringify({ title, instruction }),
       });
       const res = await fetch(`/api/manuscripts/${manuscript.id}/generate`, {
         method: "POST",
       });
-      if (!res.ok) throw new Error("AI生成に失敗しました");
+      if (!res.ok) {
+        const body = await res.json();
+        throw new Error(body.error ?? "AI生成に失敗しました");
+      }
       const updated = await res.json();
       setContent(updated.content);
     } catch (err) {
@@ -136,42 +128,28 @@ export default function ManuscriptEditor({
             </select>
           </div>
 
-          <Field label="職種・仕事内容">
+          <Field label="AIへの指示">
             <textarea
-              className="input min-h-20"
-              value={jobType}
-              onChange={(e) => setJobType(e.target.value)}
-            />
-          </Field>
-          <Field label="給与・待遇・勤務条件">
-            <textarea
-              className="input min-h-20"
-              value={conditions}
-              onChange={(e) => setConditions(e.target.value)}
-            />
-          </Field>
-          <Field label="応募資格・求める人物像">
-            <textarea
-              className="input min-h-20"
-              value={requirements}
-              onChange={(e) => setRequirements(e.target.value)}
-            />
-          </Field>
-          <Field label="会社・職場の魅力（PRポイント）">
-            <textarea
-              className="input min-h-20"
-              value={appeal}
-              onChange={(e) => setAppeal(e.target.value)}
+              className="input min-h-48"
+              value={instruction}
+              onChange={(e) => setInstruction(e.target.value)}
+              placeholder="例）飲食店のホールスタッフ求人。時給1200円〜、未経験歓迎。"
             />
           </Field>
 
           <button
             onClick={handleGenerate}
-            disabled={generating}
+            disabled={generating || !instruction.trim()}
             className="rounded-md border border-neutral-300 px-4 py-2 text-sm font-medium hover:bg-neutral-50 disabled:opacity-50 dark:border-neutral-700 dark:hover:bg-neutral-900"
           >
             {generating ? "AI生成中..." : "AIで原稿を生成・再生成"}
           </button>
+          <p className="text-xs text-neutral-500">
+            <Link href="/knowledge" className="underline">
+              ナレッジ管理
+            </Link>
+            に登録された過去原稿の構成・トーンを参考に生成します。
+          </p>
         </div>
 
         {/* 右: 原稿本文 */}

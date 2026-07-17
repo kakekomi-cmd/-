@@ -17,8 +17,7 @@ export async function GET(_request: NextRequest, { params }: Params) {
 export async function PUT(request: NextRequest, { params }: Params) {
   const { id } = await params;
   const body = await request.json();
-  const { title, status, jobType, conditions, requirements, appeal, content } =
-    body;
+  const { title, status, instruction, content } = body;
 
   try {
     const manuscript = await prisma.manuscript.update({
@@ -26,10 +25,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
       data: {
         ...(title !== undefined && { title }),
         ...(status !== undefined && { status }),
-        ...(jobType !== undefined && { jobType }),
-        ...(conditions !== undefined && { conditions }),
-        ...(requirements !== undefined && { requirements }),
-        ...(appeal !== undefined && { appeal }),
+        ...(instruction !== undefined && { instruction }),
         ...(content !== undefined && { content }),
       },
     });

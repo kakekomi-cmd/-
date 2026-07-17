@@ -12,28 +12,38 @@ export async function POST(_request: NextRequest, { params }: Params) {
     return NextResponse.json({ error: "原稿が見つかりません" }, { status: 404 });
   }
 
-  const prompt = `あなたは採用広告のプロのコピーライターです。以下の情報をもとに、求人広告の原稿を作成してください。
+  if (!manuscript.instruction.trim()) {
+    return NextResponse.json(
+      { error: "指示（instruction）が入力されていません" },
+      { status: 400 }
+    );
+  }
 
-# 求人タイトル
+  const knowledge = await prisma.knowledgeManuscript.findMany({
+    orderBy: { createdAt: "desc" },
+  });
+
+  const referenceSection =
+    knowledge.length > 0
+      ? knowledge
+          .map(
+            (k, i) => `### 参考原稿${i + 1}: ${k.title}\n${k.content}`
+          )
+          .join("\n\n")
+      : "(参考原稿はまだ登録されていません)";
+
+  const prompt = `あなたは採用広告のプロのコピーライターです。過去に作成された求人原稿を参考資料として渡すので、その構成・トーン・文体の傾向を踏まえたうえで、新しい指示に沿った求人広告の原稿を作成してください。
+
+# 参考資料（過去に作成した求人原稿）
+${referenceSection}
+
+# 新しい原稿のタイトル
 ${manuscript.title}
 
-# 職種・仕事内容
-${manuscript.jobType}
+# 新しい原稿への指示
+${manuscript.instruction}
 
-# 給与・待遇・勤務条件
-${manuscript.conditions || "(未入力)"}
-
-# 応募資格・求める人物像
-${manuscript.requirements || "(未入力)"}
-
-# 会社・職場の魅力（PRポイント）
-${manuscript.appeal || "(未入力)"}
-
-以下の見出しを使い、読み手の興味を引く自然な日本語で構成してください。
-- 仕事内容
-- 給与・待遇
-- 応募資格
-- 会社の魅力
+参考資料の構成・見出しの付け方・言葉遣いの傾向を踏襲しつつ、指示の内容を反映した原稿を作成してください。
 本文のみを出力し、前置きや説明文は含めないでください。`;
 
   const response = await anthropic.messages.create({

@@ -10,23 +10,17 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   const body = await request.json();
-  const { title, jobType, conditions, requirements, appeal } = body;
+  const { title, instruction } = body;
 
-  if (!title || !jobType) {
+  if (!title || !instruction) {
     return NextResponse.json(
-      { error: "title と jobType は必須です" },
+      { error: "title と instruction は必須です" },
       { status: 400 }
     );
   }
 
   const manuscript = await prisma.manuscript.create({
-    data: {
-      title,
-      jobType,
-      conditions: conditions ?? "",
-      requirements: requirements ?? "",
-      appeal: appeal ?? "",
-    },
+    data: { title, instruction },
   });
 
   return NextResponse.json(manuscript, { status: 201 });
