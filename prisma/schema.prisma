@@ -1,0 +1,35 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+enum ManuscriptStatus {
+  DRAFT
+  IN_REVIEW
+  COMPLETED
+}
+
+model Manuscript {
+  id          String            @id @default(cuid())
+  title       String
+  status      ManuscriptStatus  @default(DRAFT)
+
+  // AI生成のベースになる入力項目
+  jobType     String            // 職種・仕事内容
+  conditions  String            // 給与・待遇・勤務条件
+  requirements String           // 応募資格・求める人物像
+  appeal      String            // 会社・職場の魅力（PRポイント）
+
+  // 生成・編集された原稿本文
+  content     String            @default("")
+
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+}
